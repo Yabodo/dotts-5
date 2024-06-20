@@ -128,7 +128,15 @@ async function deletePost(post) {
 }
 
 async function deletePostTags(post) {
-  const { error } = await supabase.from("tags").delete().eq("post_id", post.id);
+  const { error } = await supabase
+    .from("tags")
+    .delete()
+    .eq("post_id", post.id)
+    .select();
+
+  if (error) {
+    console.error("Error deleting post tags:", error);
+  }
 }
 
 async function onSetUsername() {
