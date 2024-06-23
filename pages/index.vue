@@ -187,7 +187,8 @@ async function onSignOut() {
   try {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
-    me.value = null;
+    me.value = null; // Reset the user state
+    profile.value = null; // Reset the profile state
   } catch (error) {
     console.error("Error signing out:", error);
   }
@@ -222,6 +223,7 @@ async function getUser() {
     if (error) throw error;
     me.value = user;
     profile.value = await getProfile();
+    console.log(me.value, profile.value);
   } catch (error) {
     console.error("Error getting user:", error);
     me.value = false;
@@ -234,6 +236,13 @@ onMounted(async () => {
   await getUser();
   await getWalls();
   loading.value = false;
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange(getUser);
+  onUnmounted(() => {
+    subscription.unsubscribe();
+  });
 });
 </script>
 
@@ -268,10 +277,9 @@ onMounted(async () => {
             style="margin: 0.5rem 0"
           ></multiselect>
         </div>
-        <Dropdown v-if="!showNewLink || !showNewTags">
+        <Dropdown v-if="!showNewLink">
           <template #dropdown-options>
             <li v-if="!showNewLink" @click="showNewLink = true">Add link</li>
-            <li v-if="!showNewTags" @click="showNewTags = true">Add tags</li>
           </template>
         </Dropdown>
         <button type="submit">Post</button>

@@ -50,7 +50,7 @@ const onDelete = () => {
       </NuxtLink>
       <div style="margin-bottom: 1rem">
         <NoteParser :note="JSON.parse(props.note).content" />
-        <a :href="JSON.parse(props.note).link">{{
+        <a target="_blank" :href="JSON.parse(props.note).link">{{
           JSON.parse(props.note).link
         }}</a>
       </div>

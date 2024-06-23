@@ -6,12 +6,34 @@ const runtimeConfig = useRuntimeConfig();
 const email = ref("");
 const password = ref("");
 const notification = ref("");
+const loading = ref(true);
 
 const supabase = createClient(
   runtimeConfig.public.SUPABASE_PUBLIC_API_BASE,
   runtimeConfig.public.SUPABASE_PUBLIC_ANON
 );
 const me = ref(null);
+const profile = ref(null);
+
+async function getProfile() {
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select(
+        `
+          id,
+          name,
+          note
+        `
+      )
+      .eq("id", me.value.id);
+    if (error) throw error;
+    return data[0];
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    return false;
+  }
+}
 
 async function getUser() {
   try {
@@ -21,6 +43,8 @@ async function getUser() {
     } = await supabase.auth.getUser();
     if (error) throw error;
     me.value = user;
+    profile.value = await getProfile();
+    console.log(me.value, profile.value);
   } catch (error) {
     console.error("Error getting user:", error);
     me.value = false;
@@ -56,12 +80,21 @@ async function onSignUp(email, password) {
 }
 
 onMounted(async () => {
+  loading.value = true;
   await getUser();
+  loading.value = false;
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange(getUser);
+  onUnmounted(() => {
+    subscription.unsubscribe();
+  });
 });
 </script>
 
 <template>
-  <LoadingScreen :showLoading="me === null" />
+  <LoadingScreen :showLoading="loading" />
   <div>
     <NuxtLink to="/" style="text-decoration: none; color: black">{{
       me ? `Welcome, ${me.email}` : "Please sign in"
