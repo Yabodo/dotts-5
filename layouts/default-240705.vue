@@ -1,5 +1,5 @@
-<script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from "vue";
+<script setup>
+import { ref, onMounted, watch } from "vue";
 
 const {
   getProfileById,
@@ -16,22 +16,22 @@ const password = ref("");
 const me = ref(null);
 const profile = ref(null);
 const walls = ref([]);
-const newContent = ref("");
+const newContent = ref({});
 const newLink = ref("");
 const newTags = ref([]);
 const showNewLink = ref(false);
 const refresh = ref(0);
 const loading = ref(true);
-const notification = ref("");
-const profileName = ref("");
+const notification = ref();
+const profileName = ref();
 
-provide("localUser", { me, profile });
+provide(/* key */ "localUser", /* value */ { me, profile });
 provide("localPost", { newContent, newLink, newTags, showNewLink, refresh });
 
 async function getProfile() {
   try {
-    if (!me.value?.id) return null;
-    const res = await getProfileById(me.value.id);
+    if (!me.value || !me.value.id) return null;
+    let res = await getProfileById(me.value.id);
     if (res.error) throw res.error;
     return res;
   } catch (error) {
@@ -56,11 +56,14 @@ async function getUser() {
   }
 }
 
-async function onSignIn(email: string, password: string) {
+async function onSignIn(email, password) {
   try {
-    const response = password
-      ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signInWithOtp({ email });
+    let response;
+    if (!password) {
+      response = await supabase.auth.signInWithOtp({ email });
+    } else {
+      response = await supabase.auth.signInWithPassword({ email, password });
+    }
     if (response.error) throw response.error;
     notification.value = "Signed in successfully!";
     await getUser();
@@ -70,7 +73,7 @@ async function onSignIn(email: string, password: string) {
   }
 }
 
-async function onSignUp(email: string, password: string) {
+async function onSignUp(email, password) {
   try {
     const { error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
@@ -96,71 +99,50 @@ async function onSignOut() {
 }
 
 async function onSetUsername() {
-  try {
-    const res = await updateUsername(me.value.id, profileName.value);
-    if (res.error) throw res.error;
+  let res = await updateUsername(me.value.id, profileName.value);
+  if (res.error) {
+    console.error("Error setting username:", res.error);
+  } else {
     await getUser();
-  } catch (error) {
-    console.error("Error setting username:", error);
   }
 }
 
 async function getMyWalls() {
-  try {
-    walls.value = await getWallsOfUserId(me.value.id);
-  } catch (error) {
-    console.error("Error fetching walls:", error);
-  }
+  walls.value = await getWallsOfUserId(me.value.id);
 }
 
-async function createMyWall(name: string) {
-  try {
-    const data = await createWall(name);
-    const newTag = { id: data[0].id, name: data[0].name };
-    walls.value.push(newTag);
-    newTags.value.push(newTag);
-  } catch (error) {
-    console.error("Error creating wall:", error);
-  }
+async function createMyWall(name) {
+  let data = await createWall(name);
+  let newTag = { id: data[0].id, name: data[0].name };
+  walls.value.push(newTag);
+  newTags.value.push(newTag);
 }
 
-function removeTag(tag: any) {
+function removeTag(tag) {
   newTags.value = newTags.value.filter((obj) => obj.id !== tag.id);
 }
 
 async function onPost() {
-  if (newContent.value === "" && newLink.value === "") {
+  if (newContent.value == "" && newLink.value == "") {
     notification.value = "Please don't make empty posts";
     return;
   }
-
-  try {
-    const note = JSON.stringify({
-      content: newContent.value,
-      link: newLink.value || undefined,
-    });
-
-    const post = await createPost(note);
-
-    await createTags(
-      newTags.value.map((tag) => ({
-        wall_id: tag.id,
-        post_id: post.id,
-      }))
-    );
-
-    newContent.value = "";
-    newLink.value = "";
-    newTags.value = [];
-    refresh.value++;
-    notification.value = "Post created successfully!";
-  } catch (error) {
-    console.error("Error creating post:", error);
-    notification.value = "Error creating post. Please try again.";
-  }
+  const note = JSON.stringify({
+    content: newContent.value,
+    link: newLink.value ? newLink.value : undefined,
+  });
+  let post = await createPost(note);
+  newContent.value = "";
+  newLink.value = "";
+  refresh.value++;
+  await createTags(
+    newTags.value.map((tag) => ({
+      wall_id: tag.id,
+      post_id: post.id,
+    }))
+  );
+  newTags.value = [];
 }
-
-let authCheckInterval: number | null = null;
 
 onMounted(async () => {
   loading.value = true;
@@ -168,35 +150,19 @@ onMounted(async () => {
   await getMyWalls();
   loading.value = false;
 
-  // Set up a polling mechanism to check user authentication state every minute
-  authCheckInterval = setInterval(async () => {
-    try {
-      const {
-        data: { user },
-        error,
-      } = await supabase.auth.getUser();
-      if (error) throw error;
-      if (user) {
-        if (!me.value || user.id !== me.value.id) {
-          me.value = user;
-          profile.value = await getProfile();
-        }
-      } else {
-        me.value = null;
-        profile.value = null;
-      }
-    } catch (error) {
-      console.error("Error checking auth state:", error);
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === "SIGNED_IN") {
+      await getUser();
+    } else if (event === "SIGNED_OUT") {
+      me.value = null;
+      profile.value = null;
     }
-  }, 60000); // Check every 60 seconds
+  });
 });
 
-onUnmounted(() => {
-  if (authCheckInterval) {
-    clearInterval(authCheckInterval);
-  }
-});
-
+// Watch for changes in me.value
 watch(
   () => me.value,
   async (newValue, oldValue) => {
@@ -229,6 +195,7 @@ watch(
     </template>
     <template v-else>
       <button @click="onSignOut" type="button">Sign Out</button>
+      {{ profile }}
       <form
         v-if="!profile?.name"
         @submit.prevent="onSetUsername"
@@ -241,6 +208,7 @@ watch(
         />
         <button type="submit">Save</button>
       </form>
+
       <template v-else-if="!loading">
         <form v-if="profile?.name" @submit.prevent="onPost">
           <Editor

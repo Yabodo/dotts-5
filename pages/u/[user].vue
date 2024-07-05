@@ -1,96 +1,80 @@
 <template>
   <div>
-    <p>User: {{ $route.params.user }}</p>
-    <div>
+    <p v-if="pending">Loading...</p>
+    <template v-else-if="host">
       <p>
-        Walls:
+        Host:
         <NuxtLink
-          v-for="wall in user[0]?.walls"
           :to="{
-            name: 'w-user-wall',
-            params: { user: $route.params.user, wall: wall.name },
+            name: 'u-user',
+            params: { user: paramUser },
           }"
-          style="margin-right: 0.1rem"
-          >#{{ wall.name }}</NuxtLink
         >
+          {{ host.name }}
+        </NuxtLink>
       </p>
-    </div>
-    <Post
-      v-for="post in user[0]?.posts"
-      :key="post.id"
-      :note="post.note"
-      :user="post.users"
-      :tags="post.tags"
-      :created_at="post.created_at"
-      >{{ post }}</Post
-    >
+      <Post
+        v-for="post in posts"
+        :key="post.id"
+        :post="post"
+        @delete="() => onDelete(post)"
+      />
+    </template>
+    <p v-else>User not found</p>
   </div>
 </template>
 
 <script setup>
-import { createClient } from "@supabase/supabase-js";
+import { ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
-const runtimeConfig = useRuntimeConfig();
+import { useAsyncData } from "#app";
+
 const route = useRoute();
+const {
+  getFeedByUserId,
+  getProfileByName,
+  deletePostById,
+  deletePostTagsByPostId,
+} = useSupabaseDatabase();
+const localPost = inject("localPost");
 
-const supabase = createClient(
-  runtimeConfig.public.SUPABASE_PUBLIC_API_BASE,
-  runtimeConfig.public.SUPABASE_PUBLIC_ANON
+const paramUser = computed(() => route.params.user);
+
+const {
+  data: host,
+  pending: hostPending,
+  refresh: refreshHost,
+} = useAsyncData("host", () => getProfileByName(paramUser.value), {
+  watch: [paramUser],
+});
+
+const {
+  data: posts,
+  pending: postsPending,
+  refresh: refreshPosts,
+} = useAsyncData(
+  "posts",
+  async () => {
+    const hostData = await getProfileByName(paramUser.value);
+    if (hostData) {
+      return getFeedByUserId(hostData.id);
+    }
+    return [];
+  },
+  { watch: [paramUser] }
 );
-const user = ref([]);
-const me = ref(null);
-const paramUser = route.params.user;
-async function getProfile() {
-  try {
-    const { data, error } = await supabase
-      .from("users")
-      .select(
-        `
-          name,
-          posts (
-            id,
-            note,
-            created_at,
-            users (
-              name
-            ),
-            tags (
-              walls (
-                name
-              )
-            )
-          ),
-          walls (
-            name,
-            note
-          )
-        `
-      )
-      .eq("name", paramUser);
-    if (error) throw error;
-    user.value = data;
-  } catch (error) {
-    console.error("Error fetching user:", error);
-  }
+
+const pending = computed(() => hostPending.value || postsPending.value);
+
+async function onDelete(post) {
+  await deletePostTagsByPostId(post.id);
+  await deletePostById(post.id);
+  await getPosts();
 }
 
-async function getUser() {
-  try {
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
-    if (error) throw error;
-    me.value = user;
-    profile.value = await getProfile();
-  } catch (error) {
-    console.error("Error getting user:", error);
-    me.value = false;
+watchEffect(() => {
+  if (localPost.refresh) {
+    refreshPosts();
   }
-}
-
-onMounted(async () => {
-  await getUser();
-  await getProfile();
 });
 </script>

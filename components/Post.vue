@@ -1,31 +1,39 @@
 <script setup>
+import { useRouter } from "vue-router";
+import { computed } from "vue";
+
+const router = useRouter();
+
 const props = defineProps({
-  note: {
-    type: String,
-    required: true,
-  },
-  created_at: {
-    type: String,
-    required: true,
-  },
-  user: {
+  post: {
     type: Object,
     required: true,
-  },
-  tags: {
-    type: Object,
-    required: true,
-  },
-  profile: {
-    type: Object,
-    required: false,
   },
 });
 
 const emit = defineEmits(["share", "edit", "delete"]);
 
+const localUser = inject("localUser");
+const localPost = inject("localPost");
+
+const parsedNote = computed(() => {
+  try {
+    return JSON.parse(props.post.note);
+  } catch (error) {
+    console.error("Error parsing note:", error);
+    return { content: {}, link: "" };
+  }
+});
+
+const validTags = computed(() => {
+  return props.post.tags?.filter((tag) => tag.walls?.name) || [];
+});
+
 const onShare = () => {
   emit("share");
+  localPost.newContent.value = parsedNote.value.content;
+  localPost.newLink.value = parsedNote.value.link;
+  localPost.refresh.value++;
 };
 
 const onEdit = () => {
@@ -35,45 +43,64 @@ const onEdit = () => {
 const onDelete = () => {
   emit("delete");
 };
+
+function onOpen(tag) {
+  if (tag.walls && props.post.users?.name) {
+    router.push({
+      name: "w-user-wall",
+      params: { user: props.post.users.name, wall: tag.walls.name },
+    });
+  }
+}
 </script>
 
 <template>
   <div class="post">
     <div class="content-wrapper">
       <NuxtLink
+        v-if="props.post.users?.name"
         :to="{
           name: 'u-user',
-          params: { user: props.user.name },
+          params: { user: props.post.users.name },
         }"
       >
-        {{ props.user.name }}
+        {{ props.post.users.name }}
       </NuxtLink>
       <div style="margin-bottom: 1rem">
-        <NoteParser :note="JSON.parse(props.note).content" />
-        <a target="_blank" :href="JSON.parse(props.note).link">{{
-          JSON.parse(props.note).link
+        <NoteParser :note="parsedNote.content" />
+        <a v-if="parsedNote.link" target="_blank" :href="parsedNote.link">{{
+          parsedNote.link
         }}</a>
       </div>
       <div>
-        <NuxtLink
-          v-for="tag in tags"
-          :to="{
-            name: 'w-user-wall',
-            params: { user: props.user.name, wall: tag.walls.name },
-          }"
-          style="margin-right: 0.1rem"
-          >#{{ tag.walls.name }}</NuxtLink
-        >
+        <TagButton
+          v-for="tag in validTags"
+          :key="tag.walls.name"
+          :label="tag.walls.name"
+          :user="props.post.users"
+          :menu="[
+            {
+              label: 'Follow',
+              action: () => console.log('Follow clicked'),
+              visibility: localUser.me.value?.id !== props.post.users?.id,
+            },
+            {
+              label: 'Open',
+              action: () => onOpen(tag),
+              visibility: localUser.me.value?.id !== props.post.users?.id,
+            },
+          ]"
+        />
       </div>
     </div>
     <div class="controls-wrapper">
-      <Dropdown v-if="props.profile?.id == props.user.id">
+      <DropdownButton v-if="localUser.me.value?.id === props.post.users?.id">
         <template #dropdown-options>
           <li @click="onShare()">Share</li>
           <li @click="onEdit()">Edit</li>
           <li @click="onDelete()">Delete</li>
         </template>
-      </Dropdown>
+      </DropdownButton>
       <button v-else type="button" @click="onShare()">Share</button>
     </div>
   </div>
