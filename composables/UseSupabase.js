@@ -1,10 +1,66 @@
 export const useSupabaseDatabase = () => {
   const supabase = useSupabaseClient();
+  const user = ref(null)
+  const profile = ref(null)
+  const notification = ref("")
 
   const handleError = (error, customMessage) => {
     console.error(customMessage, error);
     throw error;
   };
+
+  const signIn = async (email, password) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      if (error) throw error;
+      user.value = data.user
+      await getProfileById(user.value.id)
+    } catch (error) {
+      handleError(error, "Error signing in user:");
+    }
+  }
+
+  const signOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) throw error;
+      user.value = null;
+      profile.value = null;
+      notification.value = "Signed out successfully!";
+      navigateTo('/')
+    } catch (error) {
+      handleError(error, "Error signing out user:");
+      notification.value = "Error signing out. Please try again.";
+    }
+  }
+
+  async function signUp(email, password) {
+    try {
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
+    } catch (error) {
+      handleError(error, "Error signing up user:");
+    }
+  }
+
+  async function getUser() {
+    try {
+      const {
+        data,
+        error,
+      } = await supabase.auth.getUser();
+      if (error) throw error;
+      user.value = data.user;
+      console.log('user', user.value)
+      return true
+    } catch (error) {
+      user.value = null;
+      return false
+    }
+  }
 
   const getProfileById = async (userId) => {
     try {
@@ -15,7 +71,8 @@ export const useSupabaseDatabase = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      profile.value = data
+      console.log(profile.value)
     } catch (error) {
       handleError(error, "Error fetching profile by id:");
     }
@@ -115,7 +172,7 @@ export const useSupabaseDatabase = () => {
     }
   };
 
-  const getFeed = async () => {
+  const getGlobalFeed = async () => {
     try {
       const { data, error } = await supabase
         .from("posts")
@@ -135,6 +192,18 @@ export const useSupabaseDatabase = () => {
       return data;
     } catch (error) {
       handleError(error, "Error fetching feed:");
+    }
+  };
+
+  const getMyFeed = async (userId) => {
+    try {
+      const { data, error } = await supabase
+      .rpc('get_posts_from_followed_walls', { user_uuid: userId })
+      .limit(10)
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error fetching your feed:");
     }
   };
 
@@ -274,9 +343,11 @@ export const useSupabaseDatabase = () => {
   };
 
   return {
+    getUser,
     getProfileById,
     getProfileByName,
-    getFeed,
+    getGlobalFeed,
+    getMyFeed,
     getWallsOfUserId,
     getWallByNameAndUser,
     getFeedByUserId,
@@ -291,5 +362,11 @@ export const useSupabaseDatabase = () => {
     deleteFollow,
     updateUsername,
     supabase,
+    user,
+    profile,
+    notification,
+    signIn,
+    signOut,
+    signUp
   };
 };

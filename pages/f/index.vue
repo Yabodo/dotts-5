@@ -1,11 +1,20 @@
 <script setup>
 import Multiselect from "vue-multiselect";
 import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 
-const { getGlobalFeed, deletePostById, deletePostTagsByPostId, createFollow, deleteFollow } =
+definePageMeta({
+  middleware: ['auth']
+})
+
+const { getMyFeed, deletePostById, deletePostTagsByPostId, createFollow, deleteFollow } =
   useSupabaseDatabase();
 const localPost = inject("localPost");
 const localFollows = inject("localFollows");
+const localUser = inject("localUser");
+const localInfo = inject("localInfo");
+
+const router = useRouter();
 
 const posts = ref([]);
 const loading = ref(false);
@@ -20,8 +29,14 @@ watch(localPost.refresh, async (_newVal, _oldVal) => {
   await getPosts();
 });
 
+watch(localInfo.loading, async (newVal, _oldVal) => {
+  await getPosts();
+});
+
 async function getPosts() {
-  posts.value = await getGlobalFeed();
+  if (localUser.me.value) {
+    posts.value = await getMyFeed(localUser.me.value.id);
+  }
 }
 
 async function onDelete(post) {
