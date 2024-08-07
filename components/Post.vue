@@ -94,11 +94,12 @@ function isWallFollowed(tag) {
           :key="tag.walls.name"
           :label="tag.walls.name"
           :user="props.post.users"
+          :id="tag.walls.id"
           :menu="[
             {
               label: 'Unfollow',
               action: () => onFollow(tag),
-              visibility: localUser.me.value?.id !== props.post.users?.id && localUser.me.value && isWallFollowed(tag),
+              visibility: localUser.me.value?.id !== props.post.users?.id && localUser.me.value && !!isWallFollowed(tag),
             },
             {
               label: 'Follow',

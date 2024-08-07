@@ -6,6 +6,10 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  id: {
+    type: Number,
+    required: true
+  },
   user: {
     type: Object,
     default: () => ({}),
@@ -15,6 +19,8 @@ const props = defineProps({
     default: () => [],
   },
 });
+
+const localFollows = inject("localFollows");
 
 const menuVisible = ref(false);
 
@@ -36,12 +42,19 @@ const handleMenuItemClick = (item) => {
   }
   menuVisible.value = false;
 };
+
+const isWallFollowed = computed(() => {
+  return localFollows.follows.value.includes(props.id)
+});
 </script>
 
 <template>
   <div v-if="label" class="tag">
     <div v-if="hasVisibleMenuItems" class="tag-wrapper" @click="toggleMenu">
-      <span class="tag-label">#{{ label }}</span>
+      <span class="tag-label">
+        <template v-if="isWallFollowed">✔️</template>
+        <template v-else>#</template>
+      {{ label }}</span>
       <span class="tag-menu">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -68,7 +81,11 @@ const handleMenuItemClick = (item) => {
       }"
       style="margin-right: 0.1rem"
     >
-      <span class="tag-label">#{{ label }}</span>
+      <span class="tag-label">
+        <template v-if="isWallFollowed">✔️</template>
+        <template v-else>#</template>
+        {{ label }}
+      </span>
     </NuxtLink>
     <div v-if="menuVisible" class="tag-menu-dropdown">
       <div
