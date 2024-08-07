@@ -19,7 +19,7 @@ const props = defineProps({
 const menuVisible = ref(false);
 
 const visibleMenuItems = computed(() => {
-  return props.menu.filter((item) => item.visibility !== false);
+  return props.menu.filter((item) => item.visibility !== false && item.visibility !== null);
 });
 
 const hasVisibleMenuItems = computed(() => {

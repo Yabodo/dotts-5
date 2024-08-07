@@ -76,7 +76,7 @@ export const useSupabaseDatabase = () => {
           note,
           created_at,
           users (id, name),
-          tags!inner (walls!inner (name, user_id))
+          tags!inner (walls!inner (id, name, user_id))
         `
         )
         .eq("user_id", userId)
@@ -101,7 +101,7 @@ export const useSupabaseDatabase = () => {
           note,
           created_at,
           users (id, name),
-          tags (walls (name, user_id))
+          tags (walls (id, name, user_id))
         `
         )
         .eq("user_id", userId)
@@ -125,7 +125,7 @@ export const useSupabaseDatabase = () => {
           note,
           created_at,
           users (id, name),
-          tags (walls (name, user_id))
+          tags (walls (id, name, user_id))
         `
         )
         .limit(10)
@@ -143,6 +143,20 @@ export const useSupabaseDatabase = () => {
       const { data, error } = await supabase
         .from("walls")
         .select("id, name")
+        .eq("user_id", userId);
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error fetching walls of user:");
+    }
+  };
+
+  const getFollowsOfUserId = async (userId) => {
+    try {
+      const { data, error } = await supabase
+        .from("follows")
+        .select("wall_id")
         .eq("user_id", userId);
 
       if (error) throw error;
@@ -194,6 +208,20 @@ export const useSupabaseDatabase = () => {
     }
   };
 
+  const createFollow = async (wallId) => {
+    try {
+      const { data, error } = await supabase
+        .from("follows")
+        .insert([{ wall_id: wallId }])
+        .select();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error creating follow:");
+    }
+  };
+
   const updateUsername = async (id, name) => {
     try {
       const { data, error } = await supabase
@@ -223,6 +251,15 @@ export const useSupabaseDatabase = () => {
     }
   };
 
+  const deleteFollow = async (wallId) => {
+    try {
+      const { error } = await supabase.from("follows").delete().eq("wall_id", wallId);
+      if (error) throw error;
+    } catch (error) {
+      handleError(error, "Error deleting wall follow by id:");
+    }
+  };
+
   const deletePostTagsByPostId = async (postId) => {
     try {
       const { error } = await supabase
@@ -244,11 +281,14 @@ export const useSupabaseDatabase = () => {
     getWallByNameAndUser,
     getFeedByUserId,
     getFeedByWallNameAndUserId,
+    getFollowsOfUserId,
     createPost,
     createTags,
     createWall,
+    createFollow,
     deletePostById,
     deletePostTagsByPostId,
+    deleteFollow,
     updateUsername,
     supabase,
   };

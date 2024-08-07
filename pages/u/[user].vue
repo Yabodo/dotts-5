@@ -18,6 +18,8 @@
         :key="post.id"
         :post="post"
         @delete="() => onDelete(post)"
+        @follow="onFollow"
+        @unFollow="onUnFollow"
       />
     </template>
     <p v-else>User not found</p>
@@ -35,8 +37,12 @@ const {
   getProfileByName,
   deletePostById,
   deletePostTagsByPostId,
+  createFollow,
+  deleteFollow
 } = useSupabaseDatabase();
+
 const localPost = inject("localPost");
+const localFollows = inject("localFollows");
 
 const paramUser = computed(() => route.params.user);
 
@@ -66,10 +72,20 @@ const {
 
 const pending = computed(() => hostPending.value || postsPending.value);
 
+async function onFollow(tag) {
+  await createFollow(tag.walls.id);
+  localFollows.refresh.value++;
+}
+
+async function onUnFollow(tag) {
+  await deleteFollow(tag.walls.id);
+  localFollows.refresh.value++;
+}
+
 async function onDelete(post) {
   await deletePostTagsByPostId(post.id);
   await deletePostById(post.id);
-  await getPosts();
+  localPost.refresh++;
 }
 
 watchEffect(() => {

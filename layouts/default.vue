@@ -5,6 +5,7 @@ const {
   getProfileById,
   updateUsername,
   getWallsOfUserId,
+  getFollowsOfUserId,
   createPost,
   createTags,
   createWall,
@@ -16,17 +17,20 @@ const password = ref("");
 const me = ref(null);
 const profile = ref(null);
 const walls = ref([]);
+const follows = ref([]);
 const newContent = ref("");
 const newLink = ref("");
 const newTags = ref([]);
 const showNewLink = ref(false);
 const refresh = ref(0);
+const refreshFollows = ref(0);
 const loading = ref(true);
 const notification = ref("");
 const profileName = ref("");
 
 provide("localUser", { me, profile });
 provide("localPost", { newContent, newLink, newTags, showNewLink, refresh });
+provide("localFollows", { follows, refresh: refreshFollows})
 
 async function getProfile() {
   try {
@@ -106,10 +110,23 @@ async function onSetUsername() {
 }
 
 async function getMyWalls() {
-  try {
-    walls.value = await getWallsOfUserId(me.value.id);
-  } catch (error) {
-    console.error("Error fetching walls:", error);
+  if (me.value) {
+    try {
+      walls.value = await getWallsOfUserId(me.value.id);
+    } catch (error) {
+      console.error("Error fetching walls:", error);
+    }
+  }
+}
+
+async function getMyFollows() {
+  if (me.value) {
+    try {
+      let userFollows = await getFollowsOfUserId(me.value.id);
+      follows.value = userFollows.map(obj => obj.wall_id);
+    } catch (error) {
+      console.error("Error fetching follows:", error);
+    }
   }
 }
 
@@ -166,6 +183,7 @@ onMounted(async () => {
   loading.value = true;
   await getUser();
   await getMyWalls();
+  await getMyFollows();
   loading.value = false;
 
   // Set up a polling mechanism to check user authentication state every minute
@@ -179,7 +197,6 @@ onMounted(async () => {
       if (user) {
         if (!me.value || user.id !== me.value.id) {
           me.value = user;
-          profile.value = await getProfile();
         }
       } else {
         me.value = null;
@@ -205,6 +222,13 @@ watch(
     }
   },
   { deep: true }
+);
+
+watch(
+  () => refreshFollows.value,
+  async (_newValue, _oldValue) => {
+    await getMyFollows();
+  }
 );
 </script>
 

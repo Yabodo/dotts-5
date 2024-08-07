@@ -11,10 +11,11 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["share", "edit", "delete"]);
+const emit = defineEmits(["follow", "unFollow", "share", "edit", "delete"]);
 
 const localUser = inject("localUser");
 const localPost = inject("localPost");
+const localFollows = inject("localFollows");
 
 const parsedNote = computed(() => {
   try {
@@ -44,6 +45,17 @@ const onDelete = () => {
   emit("delete");
 };
 
+const onFollow = (tag) => {
+  if (localUser.me.value) {
+    if (isWallFollowed(tag)) {
+      emit("unFollow", tag);
+    }
+    else if (!isWallFollowed(tag)) {
+      emit("follow", tag);
+    }
+  }
+};
+
 function onOpen(tag) {
   if (tag.walls && props.post.users?.name) {
     router.push({
@@ -51,6 +63,10 @@ function onOpen(tag) {
       params: { user: props.post.users.name, wall: tag.walls.name },
     });
   }
+}
+
+function isWallFollowed(tag) {
+  return localFollows.follows.value.includes(tag.walls.id);
 }
 </script>
 
@@ -80,9 +96,14 @@ function onOpen(tag) {
           :user="props.post.users"
           :menu="[
             {
+              label: 'Unfollow',
+              action: () => onFollow(tag),
+              visibility: localUser.me.value?.id !== props.post.users?.id && localUser.me.value && isWallFollowed(tag),
+            },
+            {
               label: 'Follow',
-              action: () => console.log('Follow clicked'),
-              visibility: localUser.me.value?.id !== props.post.users?.id,
+              action: () => onFollow(tag),
+              visibility: localUser.me.value?.id !== props.post.users?.id && localUser.me.value && !isWallFollowed(tag),
             },
             {
               label: 'Open',

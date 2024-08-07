@@ -2,9 +2,10 @@
 import Multiselect from "vue-multiselect";
 import { ref, onMounted } from "vue";
 
-const { getFeed, deletePostById, deletePostTagsByPostId } =
+const { getFeed, deletePostById, deletePostTagsByPostId, createFollow, deleteFollow } =
   useSupabaseDatabase();
 const localPost = inject("localPost");
+const localFollows = inject("localFollows");
 
 const posts = ref([]);
 const loading = ref(false);
@@ -28,10 +29,20 @@ async function onDelete(post) {
   await deletePostById(post.id);
   await getPosts();
 }
+
+async function onFollow(tag) {
+  await createFollow(tag.walls.id);
+  localFollows.refresh.value++;
+}
+
+async function onUnFollow(tag) {
+  await deleteFollow(tag.walls.id);
+  localFollows.refresh.value++;
+}
 </script>
 
 <template>
   <div>
-    <Post v-for="post in posts" :post="post" @delete="() => onDelete(post)" />
+    <Post v-for="post in posts" :post="post" @delete="() => onDelete(post)" @follow="onFollow" @unFollow="onUnFollow" />
   </div>
 </template>
