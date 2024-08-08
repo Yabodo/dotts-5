@@ -136,6 +136,7 @@ watch(
     if (newValue !== oldValue) {
       getProfile()
       getMyWalls()
+      getMyFollows()
     }
   },
   { deep: true }

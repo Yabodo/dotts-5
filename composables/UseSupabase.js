@@ -54,7 +54,6 @@ export const useSupabaseDatabase = () => {
       } = await supabase.auth.getUser();
       if (error) throw error;
       user.value = data.user;
-      console.log('user', user.value)
       return true
     } catch (error) {
       user.value = null;
@@ -72,7 +71,6 @@ export const useSupabaseDatabase = () => {
 
       if (error) throw error;
       profile.value = data
-      console.log(profile.value)
     } catch (error) {
       handleError(error, "Error fetching profile by id:");
     }
