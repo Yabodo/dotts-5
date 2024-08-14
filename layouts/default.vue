@@ -15,7 +15,8 @@ const {
   signOut,
   getUser,
   user,
-  profile
+  profile,
+  notification
 } = useSupabaseDatabase();
 
 const email = ref("");
@@ -29,7 +30,6 @@ const showNewLink = ref(false);
 const refresh = ref(0);
 const refreshFollows = ref(0);
 const loading = ref(true);
-const notification = ref("");
 const profileName = ref("");
 
 provide("localUser", { me: user, profile });

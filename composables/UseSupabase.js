@@ -5,7 +5,8 @@ export const useSupabaseDatabase = () => {
   const notification = ref("")
 
   const handleError = (error, customMessage) => {
-    console.error(customMessage, error);
+    notification.value = customMessage + "!";
+    console.error(customMessage + ":", error);
     throw error;
   };
 
@@ -17,9 +18,10 @@ export const useSupabaseDatabase = () => {
       })
       if (error) throw error;
       user.value = data.user
+      notification.value = "";
       await getProfileById(user.value.id)
     } catch (error) {
-      handleError(error, "Error signing in user:");
+      handleError(error, "Error signing in user");
     }
   }
 
@@ -32,8 +34,7 @@ export const useSupabaseDatabase = () => {
       notification.value = "Signed out successfully!";
       navigateTo('/')
     } catch (error) {
-      handleError(error, "Error signing out user:");
-      notification.value = "Error signing out. Please try again.";
+      handleError(error, "Error signing out user");
     }
   }
 
@@ -41,8 +42,9 @@ export const useSupabaseDatabase = () => {
     try {
       const { error } = await supabase.auth.signUp({ email, password });
       if (error) throw error;
+      notification.value = "Signed up successfully! Please check your mail or spam for confirmation link.";
     } catch (error) {
-      handleError(error, "Error signing up user:");
+      handleError(error, "Error signing up user");
     }
   }
 
@@ -72,7 +74,7 @@ export const useSupabaseDatabase = () => {
       if (error) throw error;
       profile.value = data
     } catch (error) {
-      handleError(error, "Error fetching profile by id:");
+      handleError(error, "Error fetching profile by id");
     }
   };
 
@@ -87,7 +89,7 @@ export const useSupabaseDatabase = () => {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleError(error, "Error fetching profile by name:");
+      handleError(error, "Error fetching profile by name");
     }
   };
 
@@ -117,7 +119,7 @@ export const useSupabaseDatabase = () => {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleError(error, "Error fetching wall:");
+      handleError(error, "Error fetching wall");
     }
   };
 
@@ -142,7 +144,7 @@ export const useSupabaseDatabase = () => {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleError(error, "Error fetching feed for user and wall:");
+      handleError(error, "Error fetching feed for user and wall");
     }
   };
 
@@ -166,7 +168,7 @@ export const useSupabaseDatabase = () => {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleError(error, "Error fetching feed for user:");
+      handleError(error, "Error fetching feed for user");
     }
   };
 
@@ -189,7 +191,7 @@ export const useSupabaseDatabase = () => {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleError(error, "Error fetching feed:");
+      handleError(error, "Error fetching feed");
     }
   };
 
@@ -201,7 +203,7 @@ export const useSupabaseDatabase = () => {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleError(error, "Error fetching your feed:");
+      handleError(error, "Error fetching your feed");
     }
   };
 
@@ -215,7 +217,7 @@ export const useSupabaseDatabase = () => {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleError(error, "Error fetching walls of user:");
+      handleError(error, "Error fetching walls of user");
     }
   };
 
@@ -229,7 +231,7 @@ export const useSupabaseDatabase = () => {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleError(error, "Error fetching walls of user:");
+      handleError(error, "Error fetching walls of user");
     }
   };
 
@@ -243,7 +245,7 @@ export const useSupabaseDatabase = () => {
       if (error) throw error;
       return data[0];
     } catch (error) {
-      handleError(error, "Error creating post:");
+      handleError(error, "Error creating post");
     }
   };
 
@@ -257,7 +259,7 @@ export const useSupabaseDatabase = () => {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleError(error, "Error inserting tags:");
+      handleError(error, "Error inserting tags");
     }
   };
 
@@ -271,7 +273,7 @@ export const useSupabaseDatabase = () => {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleError(error, "Error creating wall:");
+      handleError(error, "Error creating wall");
     }
   };
 
@@ -285,7 +287,7 @@ export const useSupabaseDatabase = () => {
       if (error) throw error;
       return data;
     } catch (error) {
-      handleError(error, "Error creating follow:");
+      handleError(error, "Error creating follow");
     }
   };
 
@@ -305,7 +307,7 @@ export const useSupabaseDatabase = () => {
         throw new Error("No user found or no update performed");
       }
     } catch (error) {
-      handleError(error, "Error updating username:");
+      handleError(error, "Error updating username");
     }
   };
 
@@ -314,7 +316,7 @@ export const useSupabaseDatabase = () => {
       const { error } = await supabase.from("posts").delete().eq("id", postId);
       if (error) throw error;
     } catch (error) {
-      handleError(error, "Error deleting post by id:");
+      handleError(error, "Error deleting post by id");
     }
   };
 
@@ -323,7 +325,7 @@ export const useSupabaseDatabase = () => {
       const { error } = await supabase.from("follows").delete().eq("wall_id", wallId);
       if (error) throw error;
     } catch (error) {
-      handleError(error, "Error deleting wall follow by id:");
+      handleError(error, "Error deleting wall follow by id");
     }
   };
 
@@ -336,7 +338,7 @@ export const useSupabaseDatabase = () => {
         .select();
       if (error) throw error;
     } catch (error) {
-      handleError(error, "Error deleting post tags by post id:");
+      handleError(error, "Error deleting post tags by post id");
     }
   };
 
