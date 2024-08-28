@@ -2,7 +2,7 @@
   <header class="bg-white">
     <div class="mx-auto max-w-screen-xl px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col md:flex-row h-16 items-center justify-between">
-        <div class="md:flex md:items-center md:gap-12">
+        <div class="mb-2 md:mb-0 md:flex md:items-center md:gap-12">
           <NuxtLink to="/" class="block text-teal-600">
             <span class="sr-only">Home</span>
             <svg class="h-8" viewBox="0 0 1120 1280" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -15,7 +15,7 @@
 
         <div class="md:flex md:items-center md:gap-12">
           <nav aria-label="Global">
-            <ul class="flex items-center text-sm m-0 p-0 pt-5 md:pt-0">
+            <ul class="flex items-center text-sm m-0 p-0 md:pt-0">
               <ButtonText to="/f" label="My feed" icon="i-tabler-star" />
 
               <ButtonText to="/" label="Global feed" icon="i-tabler-world" />

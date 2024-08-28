@@ -6,11 +6,11 @@
       </TransitionChild>
 
       <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+        <div class="flex min-h-full justify-center p-4 text-center items-center">
           <TransitionChild as="template" enter="ease-out duration-300" enter-from="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" enter-to="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leave-from="opacity-100 translate-y-0 sm:scale-100" leave-to="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-            <DialogPanel class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+            <DialogPanel class="p-3 relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 w-full sm:max-w-lg">
               
-            <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+            <div class="mx-auto w-full max-w-sm">
               <svg class="mx-auto h-10 w-full mt-10" viewBox="0 0 1120 1280" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M640 320L0 0L88 1280H320L640 320Z" fill="#191970"/>
                 <path d="M824 640L1008 960L824 1280H456L591.489 873.535L824 640Z" fill="#191970"/>
@@ -20,7 +20,7 @@
               <p v-if="modalNotification" class="text-center font-medium text-gray-900">{{ modalNotification }}</p>
             </div>
 
-            <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+            <div class="mt-10 mx-auto w-full max-w-sm">
               <form class="space-y-6" @submit.prevent>
                 <div v-if="isLogin || isRegister">
                   <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address</label>
