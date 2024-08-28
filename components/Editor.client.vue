@@ -7,7 +7,6 @@
 <script setup>
 import EditorJS from "@editorjs/editorjs";
 import Header from "@editorjs/header";
-import List from "@editorjs/list";
 import paragraph from "@editorjs/paragraph";
 import quote from "@editorjs/quote";
 import warning from "@editorjs/warning";
@@ -15,7 +14,6 @@ import delimiter from "@editorjs/delimiter";
 import list from "@editorjs/list";
 import nestedList from "@editorjs/nested-list";
 import checklist from "@editorjs/checklist";
-import image from "@editorjs/image";
 import simpleImage from "@editorjs/simple-image";
 import table from "@editorjs/table";
 import code from "@editorjs/code";
@@ -82,29 +80,6 @@ onMounted(() => {
       checklist: {
         class: checklist,
         inlineToolbar: true,
-      },
-      image: {
-        class: image,
-        config: {
-          // byFile: `http://localhost:8000/upload/image`,
-          uploader: {
-            async uploadByFile(file) {
-              // prepare data
-              const data = new FormData();
-              data.append("image", file);
-
-              // sending data
-              const req = await fetch(`api/images`, {
-                method: "POST",
-                body: data,
-              });
-
-              const res = await req.json();
-
-              return res;
-            },
-          },
-        },
       },
       simpleImage: {
         class: simpleImage,

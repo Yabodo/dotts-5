@@ -58,6 +58,11 @@ async function onUnFollow(tag) {
 
 <template>
   <div>
-    <Post v-for="post in posts" :post="post" @delete="() => onDelete(post)" @follow="onFollow" @unFollow="onUnFollow" />
+    <p v-if="posts.length < 1">Posts have tags. Follow these tags to see content in your feed.</p>
+    <MasonryWall :items="posts" :column-width="400" :gap="16" class="my-3">
+      <template #default="{ item: post }">
+        <Post :post="post" @delete="() => onDelete(post)" @follow="onFollow" @unFollow="onUnFollow" />
+      </template>
+    </MasonryWall>
   </div>
 </template>

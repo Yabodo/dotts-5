@@ -1,13 +1,14 @@
+const user = ref(null)
+const profile = ref(null)
+const notification = ref("")
+
 export const useSupabaseDatabase = () => {
   const supabase = useSupabaseClient();
-  const user = ref(null)
-  const profile = ref(null)
-  const notification = ref("")
 
   const handleError = (error, customMessage) => {
-    notification.value = customMessage + "!";
-    console.error(customMessage + ":", error);
-    throw error;
+    notification.value = "";
+    //notification.value = customMessage;
+    //console.error(customMessage + ":", error);
   };
 
   const signIn = async (email, password) => {
@@ -20,8 +21,17 @@ export const useSupabaseDatabase = () => {
       user.value = data.user
       notification.value = "";
       await getProfileById(user.value.id)
+      return true
     } catch (error) {
-      handleError(error, "Error signing in user");
+      if (error.message === "Invalid login credentials") {
+        handleError(error, "Invalid username or password. Please try again.");
+      }
+      else if (error.message === "Email not confirmed") {
+        handleError(error, "Email not confirmed! Please check your inbox or spam.");
+      } else {
+        handleError(error, "An error occurred while signing in. Please try again.");
+      }
+      return false
     }
   }
 
@@ -42,9 +52,9 @@ export const useSupabaseDatabase = () => {
     try {
       const { error } = await supabase.auth.signUp({ email, password });
       if (error) throw error;
-      notification.value = "Signed up successfully! Please check your mail or spam for confirmation link.";
+      return true
     } catch (error) {
-      handleError(error, "Error signing up user");
+      return false
     }
   }
 
@@ -138,7 +148,7 @@ export const useSupabaseDatabase = () => {
         )
         .eq("user_id", userId)
         .eq("tags.walls.name", name)
-        .limit(10)
+        .limit(20)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -162,7 +172,7 @@ export const useSupabaseDatabase = () => {
         `
         )
         .eq("user_id", userId)
-        .limit(10)
+        .limit(20)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -185,7 +195,7 @@ export const useSupabaseDatabase = () => {
           tags (walls (id, name, user_id))
         `
         )
-        .limit(10)
+        .limit(100)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -199,7 +209,7 @@ export const useSupabaseDatabase = () => {
     try {
       const { data, error } = await supabase
       .rpc('get_posts_from_followed_walls', { user_uuid: userId })
-      .limit(10)
+      .limit(20)
       if (error) throw error;
       return data;
     } catch (error) {
@@ -300,14 +310,26 @@ export const useSupabaseDatabase = () => {
         .select();
 
       if (error) throw error;
-
-      if (data && data.length > 0) {
-        return { success: true, data: data[0] };
-      } else {
-        throw new Error("No user found or no update performed");
-      }
     } catch (error) {
       handleError(error, "Error updating username");
+    }
+  };
+
+  const insertUsername = async (name) => {
+    try {
+      const { error } = await supabase
+        .from("users")
+        .insert({ name })
+        .select();
+
+      if (error) throw error;
+      if (user.value?.id) {
+        await getProfileById(user.value.id);
+      }
+      return true
+    } catch (error) {
+      handleError(error, "Error updating username");
+      return false
     }
   };
 
@@ -361,6 +383,7 @@ export const useSupabaseDatabase = () => {
     deletePostTagsByPostId,
     deleteFollow,
     updateUsername,
+    insertUsername,
     supabase,
     user,
     profile,

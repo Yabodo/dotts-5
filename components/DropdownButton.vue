@@ -1,7 +1,7 @@
 <template>
   <div class="dropdown" @click="toggleDropdown">
-    <button v-if="!isOpen" type="button">+</button>
-    <button v-else type="button">-</button>
+    <ButtonTransparentIcon v-if="!isOpen" type="button" icon="i-tabler-dots" />
+    <ButtonTransparentIcon v-else type="button" icon="i-tabler-minus" />
     <div class="dropdown-menu" v-show="isOpen">
       <slot name="dropdown-options"></slot>
     </div>

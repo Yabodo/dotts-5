@@ -13,14 +13,16 @@
           {{ host.name }}
         </NuxtLink>
       </p>
-      <Post
-        v-for="post in posts"
-        :key="post.id"
-        :post="post"
-        @delete="() => onDelete(post)"
-        @follow="onFollow"
-        @unFollow="onUnFollow"
-      />
+      <MasonryWall :items="posts" :column-width="400" :gap="16" class="my-3">
+        <template #default="{ item: post }">
+          <Post
+            :post="post"
+            @delete="() => onDelete(post)"
+            @follow="onFollow"
+            @unFollow="onUnFollow"
+          />
+        </template>
+      </MasonryWall>
     </template>
     <p v-else>User not found</p>
   </div>

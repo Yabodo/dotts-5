@@ -1,26 +1,21 @@
-<script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from "vue";
+<script setup>
+import { ref, onMounted, watch } from "vue";
 
 const {
   getProfileById,
-  updateUsername,
   getWallsOfUserId,
   getFollowsOfUserId,
   createPost,
   createTags,
   createWall,
-  supabase,
-  signIn,
-  signUp,
-  signOut,
   getUser,
   user,
   profile,
   notification
 } = useSupabaseDatabase();
 
-const email = ref("");
-const password = ref("");
+const { addNotification } = useNotifications()
+
 const walls = ref([]);
 const follows = ref([]);
 const newContent = ref("");
@@ -30,7 +25,7 @@ const showNewLink = ref(false);
 const refresh = ref(0);
 const refreshFollows = ref(0);
 const loading = ref(true);
-const profileName = ref("");
+const modalSetUsername = ref();
 
 provide("localUser", { me: user, profile });
 provide("localPost", { newContent, newLink, newTags, showNewLink, refresh });
@@ -42,22 +37,12 @@ async function getProfile() {
   getProfileById(user.value.id);
 }
 
-async function onSetUsername() {
-  try {
-    const res = await updateUsername(user.value.id, profileName.value);
-    if (res.error) throw res.error;
-    await getUser();
-  } catch (error) {
-    console.error("Error setting username:", error);
-  }
-}
-
 async function getMyWalls() {
   if (user.value) {
     try {
       walls.value = await getWallsOfUserId(user.value.id);
     } catch (error) {
-      console.error("Error fetching walls:", error);
+      addNotification('Error fetching walls.', 'error');
     }
   }
 }
@@ -68,29 +53,31 @@ async function getMyFollows() {
       let userFollows = await getFollowsOfUserId(user.value.id);
       follows.value = userFollows.map(obj => obj.wall_id);
     } catch (error) {
-      console.error("Error fetching follows:", error);
+      addNotification('Error fetching follows.', 'error');
     }
+  } else {
+    follows.value = []
   }
 }
 
-async function createMyWall(name: string) {
+async function createMyWall(name) {
   try {
     const data = await createWall(name);
     const newTag = { id: data[0].id, name: data[0].name };
     walls.value.push(newTag);
     newTags.value.push(newTag);
   } catch (error) {
-    console.error("Error creating wall:", error);
+    addNotification('Error creating wall.', 'error');
   }
 }
 
-function removeTag(tag: any) {
+function removeTag(tag) {
   newTags.value = newTags.value.filter((obj) => obj.id !== tag.id);
 }
 
 async function onPost() {
   if (newContent.value === "" && newLink.value === "") {
-    notification.value = "Please don't make empty posts";
+    addNotification("Please don't make empty posts.", 'warning');
     return;
   }
 
@@ -115,29 +102,37 @@ async function onPost() {
     refresh.value++;
     notification.value = "Post created successfully!";
   } catch (error) {
-    console.error("Error creating post:", error);
-    notification.value = "Error creating post. Please try again.";
+    addNotification("Error creating post.", 'error');
   }
 }
-
-let authCheckInterval: number | null = null;
 
 onMounted(async () => {
   loading.value = true;
   await getUser();
-  await getMyWalls();
-  await getMyFollows();
   loading.value = false;
 });
 
 watch(
   () => user.value,
-  (newValue, oldValue) => {
-    if (newValue !== oldValue) {
-      getProfile()
-      getMyWalls()
-      getMyFollows()
+  async (newValue, _oldValue) => {
+    loading.value = true;
+    if (newValue) {
+      await getProfile()
+      Promise.all([getMyWalls(), getMyFollows()]).catch((error) => {
+        console.error(error.message);
+      }).finally(() => {
+        if (!profile.value?.name) {
+          modalSetUsername.value?.open()
+        }
+      })
+    } else {
+      newContent.value = "";
+      newLink.value = "";
+      newTags.value = [];
+      refresh.value++;
+      refreshFollows.value++;
     }
+    loading.value = false;
   },
   { deep: true }
 );
@@ -148,90 +143,91 @@ watch(
     await getMyFollows();
   }
 );
+
+watch(
+  () => notification.value,
+  (newValue, _oldValue) => {
+    if (newValue) {
+      addNotification(newValue);
+    }
+  }
+);
 </script>
 
 <template>
   <LoadingScreen :showLoading="loading" />
-  <div>
-    <NuxtLink to="/" style="text-decoration: none; color: black">
-      {{ user ? `Welcome, ${profile?.name}` : "Please sign in" }}
-    </NuxtLink>
-    <p>{{ notification }}</p>
+  <NotificationSystem />
+  <QuoteBar v-if="!loading" />
+  <div class="p-3 max-w-screen-xl mx-auto" v-if="!loading">
+    <NavigationBar />
     <template v-if="!user">
-      <form @submit.prevent>
-        <input v-model="email" placeholder="Email" type="email" />
-        <input v-model="password" placeholder="Password" type="password" />
-        <button @click="signIn(email, password)" type="submit">
-          Sign in
-        </button>
-        <button @click="signUp(email, password)" type="submit">
-          Sign up
-        </button>
-      </form>
+      <ModalLogin />
     </template>
     <template v-else>
-      <NuxtLink
-        to="/"
-        style="margin-right: 0.1rem"
-      >
-        Global feed
-      </NuxtLink>
-      <NuxtLink
-        to="f"
-        style="margin-right: 0.1rem"
-      >
-        My feed
-      </NuxtLink>
-      <button @click="signOut" type="button">Sign Out</button>
-      <form
-        v-if="!profile?.name"
-        @submit.prevent="onSetUsername"
-        style="margin: 10px 0"
-      >
-        <input
-          v-model="profileName"
-          placeholder="Pick a username"
-          type="text"
-        />
-        <button type="submit">Save</button>
-      </form>
-      <template v-else-if="!loading">
-        <form v-if="profile?.name" @submit.prevent="onPost">
+      <ModalSetUsername ref="modalSetUsername" />
+      <form v-if="profile?.name" @submit.prevent class="my-10">
+        <div class="flex items-center">
           <Editor
             v-model:model-value="newContent"
             :key="refresh"
-            style="margin: 0.5rem 0"
+            style="margin: 0.5rem 0; display: block; flex-grow: 1;"
+            class="font-serif"
           />
+          <ButtonPrimaryIcon @click="showNewLink = !showNewLink" icon="i-tabler-link" class="ms-2" />
+        </div>
+        <div class="flex items-stretch">
           <input
             v-if="showNewLink"
             v-model="newLink"
             placeholder="Insert Link"
             type="text"
-            style="margin: 0.5rem 0"
+            class="grow px-2 py-2 text-gray-700 transition-colors duration-200 font-serif"
+            style="border: 1px #e4e4e4 solid; border-radius: 5px;"
           />
-          <div>
-            <multiselect
-              v-model="newTags"
-              tag-placeholder="Add this as new tag"
-              placeholder="Search or add a tag"
-              label="name"
-              :options="walls"
-              :multiple="true"
-              :taggable="true"
-              @tag="createMyWall"
-              @remove="removeTag"
-              style="margin: 0.5rem 0"
-            ></multiselect>
-          </div>
-          <DropdownButton v-if="!showNewLink">
-            <template #dropdown-options>
-              <li v-if="!showNewLink" @click="showNewLink = true">Add link</li>
-            </template>
-          </DropdownButton>
-          <button type="submit">Post</button>
-        </form>
-      </template>
+        </div>
+        <div>
+          <multiselect
+            v-model="newTags"
+            tag-placeholder="Add this as new tag"
+            placeholder="Search or add a tag"
+            label="name"
+            :options="walls"
+            :multiple="true"
+            :taggable="true"
+            @tag="createMyWall"
+            @remove="removeTag"
+            style="margin: 0.5rem 0"
+          ></multiselect>
+        </div>
+        <ButtonPrimary @click="onPost" label="Post" icon="i-tabler-message" class="my-2" />
+      </form>
     </template>
     <slot />
   </div>
 </template>
+
+<style scoped>
+input, textarea {
+  font-family: Arial, sans-serif;
+}
+
+:deep(::placeholder) {
+  color: gray;
+  font-family: Arial, sans-serif;
+}
+
+:deep(.ce-paragraph[data-placeholder]:empty::before) {
+  font-family: Arial, sans-serif;
+  color: gray;
+}
+
+:deep(.multiselect__input::placeholder) {
+  color: gray;
+  font-family: Arial, sans-serif;
+}
+
+:deep(span.multiselect__placeholder) {
+  color: gray;
+  font-family: Arial, sans-serif;
+}
+</style>

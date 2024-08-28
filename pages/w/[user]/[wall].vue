@@ -12,15 +12,17 @@
       </NuxtLink>
     </p>
     <p>Wall: {{ paramWall }}</p>
-    <Post
-      v-if="posts"
-      v-for="post in posts"
-      :post="post"
-      :key="localPost.refresh"
-      @delete="() => onDelete(post)"
-      @follow="onFollow"
-      @unFollow="onUnFollow"
-    />
+    <MasonryWall :items="posts" :column-width="400" :gap="16" class="my-3">
+      <template #default="{ item: post }">
+        <Post
+          :post="post"
+          :key="localPost.refresh"
+          @delete="() => onDelete(post)"
+          @follow="onFollow"
+          @unFollow="onUnFollow"
+        />
+      </template>
+    </MasonryWall>
   </div>
 </template>
 

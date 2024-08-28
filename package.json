@@ -28,11 +28,23 @@
     "@editorjs/text-variant-tune": "^1.0.2",
     "@editorjs/underline": "^1.1.0",
     "@editorjs/warning": "^1.4.0",
+    "@headlessui/vue": "^1.7.22",
+    "@iconify-json/tabler": "^1.1.120",
+    "@pinia/nuxt": "^0.5.4",
     "@supabase/supabase-js": "^2.43.5",
+    "@unocss/nuxt": "^0.62.2",
+    "@yeger/vue-masonry-wall": "^5.0.14",
     "editorjs-html": "^3.4.3",
+    "inspirational-quotes": "^2.0.1",
     "nuxt": "^3.12.2",
+    "unocss-preset-animations": "^1.1.0",
+    "unocss-preset-shadcn": "^0.3.1",
     "vue": "^3.4.29",
     "vue-multiselect": "^3.0.0",
     "vue-router": "^4.3.3"
+  },
+  "devDependencies": {
+    "@julr/unocss-preset-forms": "^0.1.0",
+    "@nuxtjs/color-mode": "^3.4.4"
   }
 }

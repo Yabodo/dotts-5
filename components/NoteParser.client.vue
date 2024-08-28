@@ -1,5 +1,5 @@
 <template>
-  <div v-html="html"></div>
+  <div v-html="html" class="whitespace-normal"></div>
 </template>
 
 <script setup>

@@ -71,7 +71,7 @@ function isWallFollowed(tag) {
 </script>
 
 <template>
-  <div class="post">
+  <div class="p-16px border border-solid border-slate-100 rounded-md flex items-end justify-between shadow-[0_4px_11px_0_rgba(37,44,97,0.15),0_1px_3px_0_rgba(93,100,148,0.2)] bg-gradient-to-b from-white to-stone-50">
     <div class="content-wrapper">
       <NuxtLink
         v-if="props.post.users?.name"
@@ -84,9 +84,9 @@ function isWallFollowed(tag) {
       </NuxtLink>
       <div style="margin-bottom: 1rem">
         <NoteParser :note="parsedNote.content" />
-        <a v-if="parsedNote.link" target="_blank" :href="parsedNote.link">{{
-          parsedNote.link
-        }}</a>
+        <a v-if="parsedNote.link" target="_blank" :href="parsedNote.link" class="block w-full overflow-hidden text-blue-600 hover:text-blue-800 underline w-100" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block">
+          {{ parsedNote.link }}
+        </a>
       </div>
       <div>
         <TagButton
@@ -115,7 +115,7 @@ function isWallFollowed(tag) {
         />
       </div>
     </div>
-    <div class="controls-wrapper">
+    <div class="controls-wrapper me-2">
       <DropdownButton v-if="localUser.me.value?.id === props.post.users?.id">
         <template #dropdown-options>
           <li @click="onShare()">Share</li>
@@ -123,18 +123,13 @@ function isWallFollowed(tag) {
           <li @click="onDelete()">Delete</li>
         </template>
       </DropdownButton>
-      <button v-else type="button" @click="onShare()">Share</button>
+      <ButtonTransparentIcon v-else @click="onShare()" icon="i-tabler-copy" />
     </div>
   </div>
 </template>
 
 <style scoped>
-.post {
-  margin: 1rem 0;
-  padding: 0.4rem;
-  border: 1px black solid;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.content-wrapper {
+  max-width: calc(80%)
 }
 </style>

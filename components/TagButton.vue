@@ -49,29 +49,12 @@ const isWallFollowed = computed(() => {
 </script>
 
 <template>
-  <div v-if="label" class="tag">
-    <div v-if="hasVisibleMenuItems" class="tag-wrapper" @click="toggleMenu">
-      <span class="tag-label">
-        <template v-if="isWallFollowed">✔️</template>
-        <template v-else>#</template>
+  <div v-if="label" class="relative inline-flex items-center border border-solid border-inside rounded-lg py-1 px-2 mx-1" :class="isWallFollowed ? 'border-blue-500' : 'border-stone-400'">
+    <div v-if="hasVisibleMenuItems" class="flex items-center cursor-pointer" @click="toggleMenu">
+      <span v-if="isWallFollowed" class="i-tabler-check text-sm text-blue-500 "/>
+      <span class="cursor-pointer text-stone-600 mx-2" style="pointer-events: unset;">
       {{ label }}</span>
-      <span class="tag-menu">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <circle cx="12" cy="12" r="1" />
-          <circle cx="19" cy="12" r="1" />
-          <circle cx="5" cy="12" r="1" />
-        </svg>
-      </span>
+      <span class="i-tabler-dots text-stone-600"/>
     </div>
     <NuxtLink
       v-else
@@ -81,9 +64,8 @@ const isWallFollowed = computed(() => {
       }"
       style="margin-right: 0.1rem"
     >
-      <span class="tag-label">
-        <template v-if="isWallFollowed">✔️</template>
-        <template v-else>#</template>
+      <span v-if="isWallFollowed" class="i-tabler-check text-sm text-blue-500 "/>
+      <span class="cursor-pointer text-stone-600 mx-2" style="pointer-events: unset;">
         {{ label }}
       </span>
     </NuxtLink>
@@ -100,23 +82,6 @@ const isWallFollowed = computed(() => {
 </template>
 
 <style scoped>
-.tag {
-  display: inline-flex;
-  align-items: center;
-  background-color: #efefef;
-  border: 1px solid #767676;
-  border-radius: 3px;
-  padding: 4px 12px;
-  margin: 4px;
-  font-size: 14px;
-  position: relative;
-}
-
-.tag-label {
-  margin-right: 4px;
-  cursor: pointer;
-  pointer-events: unset;
-}
 
 a {
   color: inherit;
@@ -131,11 +96,6 @@ a:focus {
 
 .tag-wrapper {
   cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.tag-menu {
   display: flex;
   align-items: center;
 }
