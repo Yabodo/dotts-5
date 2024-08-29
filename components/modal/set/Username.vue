@@ -53,10 +53,12 @@ import { ref } from 'vue'
 import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessui/vue'
 
 const {
-  insertUsername,
+  upsertUsername,
 } = useSupabaseDatabase();
 
 const { addNotification } = useNotifications()
+
+const localUser = inject("localUser")
 
 const isOpen = ref(false)
 const username = ref("")
@@ -65,8 +67,8 @@ async function onSubmit() {
   if (username.value == "") {
     return
   }
-  const result = await insertUsername(username.value);
-  if (result) {
+  const res = await upsertUsername(localUser.me.value.id, username.value);
+  if (res) {
     addNotification(`Set your username to ${username.value}`, 'success');
     username.value = '';
     close()

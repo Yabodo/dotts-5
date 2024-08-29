@@ -319,7 +319,7 @@ export const useSupabaseDatabase = () => {
     try {
       const { error } = await supabase
         .from("users")
-        .insert({ name })
+        .insert([{ name }])
         .select();
 
       if (error) throw error;
@@ -329,6 +329,23 @@ export const useSupabaseDatabase = () => {
       return true
     } catch (error) {
       handleError(error, "Error updating username");
+      return false
+    }
+  };
+
+  const upsertUsername = async (id, name) => {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .upsert([{ name }])
+        .eq("id", id)
+        .select();
+
+      if (error) throw error;
+      await getProfileById(id);
+      return true
+    } catch (error) {
+      handleError(error, "Error upserting username");
       return false
     }
   };
@@ -384,6 +401,7 @@ export const useSupabaseDatabase = () => {
     deleteFollow,
     updateUsername,
     insertUsername,
+    upsertUsername,
     supabase,
     user,
     profile,
