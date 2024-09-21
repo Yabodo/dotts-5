@@ -117,14 +117,15 @@ watch(
   async (newValue, _oldValue) => {
     loading.value = true;
     if (newValue) {
-      await getProfile()
-      Promise.all([getMyWalls(), getMyFollows()]).catch((error) => {
+      await getProfile();
+      await Promise.all([getMyWalls(), getMyFollows()]).catch((error) => {
         console.error(error.message);
-      }).finally(() => {
-        if (!profile.value?.name) {
-          modalSetUsername.value?.open()
-        }
-      })
+      });
+      
+      // Check if the profile is loaded and if the username is not set
+      if (profile.value && !profile.value.name) {
+        modalSetUsername.value?.open();
+      }
     } else {
       newContent.value = "";
       newLink.value = "";
