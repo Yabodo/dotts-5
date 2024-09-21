@@ -15,7 +15,7 @@ export default defineNuxtConfig({
         { rel: 'mask-icon', href: '/safari-pinned-tab.svg', color: '#5bbad5' },
       ],
       meta: [
-        { name: 'description', content: 'Making history.' }
+        { name: 'description', content: 'Making history!' }
       ],
     },
   },
