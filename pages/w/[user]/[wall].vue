@@ -30,7 +30,7 @@
 import { useRoute } from "vue-router";
 
 const route = useRoute();
-const { getFeedByWallNameAndUserId, getProfileByName, createFollow, deleteFollow } = useSupabaseDatabase();
+const { getFeedByWallNameAndUserId, getProfileByName, createFollow, deleteFollow, deletePostTagsByPostId, deletePostById } = useSupabaseDatabase();
 
 const localPost = inject("localPost");
 const localFollows = inject("localFollows");
@@ -53,7 +53,7 @@ async function onUnFollow(tag) {
 async function onDelete(post) {
   await deletePostTagsByPostId(post.id);
   await deletePostById(post.id);
-  localPost.refresh++;
+  localPost.refresh.value++;
 }
 
 onMounted(async () => {

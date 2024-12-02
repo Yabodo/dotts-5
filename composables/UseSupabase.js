@@ -1,3 +1,5 @@
+const { addNotification } = useNotifications()
+
 const user = ref(null)
 const profile = ref(null)
 const notification = ref("")
@@ -5,10 +7,16 @@ const notification = ref("")
 export const useSupabaseDatabase = () => {
   const supabase = useSupabaseClient();
 
+  const handleNotification = (error, customMessage, type) => {
+    if (customMessage) {
+      addNotification(customMessage, type)
+    } else {
+      addNotification(error, type)
+    }
+  };
+
   const handleError = (error, customMessage) => {
-    notification.value = "";
-    //notification.value = customMessage;
-    //console.error(customMessage + ":", error);
+    handleNotification(error, customMessage, 'error')
   };
 
   const signIn = async (email, password) => {
@@ -19,7 +27,6 @@ export const useSupabaseDatabase = () => {
       })
       if (error) throw error;
       user.value = data.user
-      notification.value = "";
       await getProfileById(user.value.id)
       return true
     } catch (error) {
@@ -50,10 +57,14 @@ export const useSupabaseDatabase = () => {
 
   async function signUp(email, password) {
     try {
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) throw error;
+      if (data) {
+        await signIn(email, password)
+      }
       return true
     } catch (error) {
+      handleError(error, "An error occurred while registering. Please try a different combination.");
       return false
     }
   }

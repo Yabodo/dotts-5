@@ -122,14 +122,6 @@ async function onRegister() {
     return
   }
   const result = await signUp(email.value, password.value)
-  if (result) {
-    let message = "Signed up successfully! Please check your mail or spam for confirmation link."
-    addNotification(message, "success")
-    modalNotification.value = message
-    modalState.value = "login"
-  } else {
-    addNotification("Signing up account failed! Email probably in use or the password too insecure.", "error")
-  }
 }
 
 async function onLogin() {
@@ -137,6 +129,7 @@ async function onLogin() {
   if (email.value == "" || password.value == "") {
     return
   }
+
   let signedIn = await signIn(email.value, password.value)
   if (signedIn) {
     email.value = ""

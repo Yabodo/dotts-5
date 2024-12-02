@@ -29,7 +29,6 @@
 </template>
 
 <script setup>
-import { ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 import { useAsyncData } from "#app";
 
@@ -87,11 +86,11 @@ async function onUnFollow(tag) {
 async function onDelete(post) {
   await deletePostTagsByPostId(post.id);
   await deletePostById(post.id);
-  localPost.refresh++;
+  localPost.refresh.value++;
 }
 
 watchEffect(() => {
-  if (localPost.refresh) {
+  if (localPost.refresh.value) {
     refreshPosts();
   }
 });
