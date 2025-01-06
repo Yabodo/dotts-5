@@ -1,4 +1,4 @@
-# Dotts 1.0
+# Dotts 2
 
 Dotts is a modern social platform that allows users to create, share, and discover content through a unique tagging system called "walls". Built with Nuxt 3 and Vue.js, it offers a clean, responsive interface for meaningful content sharing.
 
@@ -39,7 +39,7 @@ ANNOUNCEMENT=optional_announcement_message## Installation
 1. Clone the repository:
 
 git clone https://github.com/yabodo/dotts-2.git
-cd dotts
+cd dotts-2
 
 2. Install dependencies:
 
@@ -81,7 +81,7 @@ This project is licensed under the Proprietary License. All rights reserved. Una
 
 ## Contact
 
-- Website: [dotts.org](https://dotts.org)
+- Website: [https://240616-dotts.vercel.app/](https://240616-dotts.vercel.app/)
 - Support via Github user Yabodo
 
 ## Acknowledgments
