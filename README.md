@@ -38,7 +38,7 @@ ANNOUNCEMENT=optional_announcement_message## Installation
 
 1. Clone the repository:
 
-git clone https://github.com/yabodo/dotts.git
+git clone https://github.com/yabodo/dotts-2.git
 cd dotts
 
 2. Install dependencies:
