@@ -392,6 +392,105 @@ export const useSupabaseDatabase = () => {
     }
   };
 
+  const searchUsers = async (searchTerm) => {
+    try {
+      const { data, error } = await supabase
+      .rpc('search_users', { search_term: searchTerm })
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error searching friends");
+    }
+  };
+
+  const getMyFriends = async () => {
+    try {
+      const { data, error } = await supabase
+      .rpc('get_accepted_friends')
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error fetching your accepted friends");
+    }
+  };
+
+  const getAllMyFriends = async () => {
+    try {
+      const { data, error } = await supabase
+      .rpc('get_friends')
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error fetching your friends");
+    }
+  };
+
+  const addFriend = async (userId) => {
+    try {
+      const { data, error } = await supabase
+      .rpc('add_friend', { f_id: userId })
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error adding friend");
+    }
+  };
+
+  const removeFriend = async (userId) => {
+    try {
+      const { data, error } = await supabase
+      .rpc('remove_friend', { f_id: userId })
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error removing friend");
+    }
+  };
+
+  const acceptFriend = async (userId) => {
+    try {
+      const { data, error } = await supabase
+      .rpc('accept_friend', { requester_id: userId })
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error accepting friend");
+    }
+  };
+
+  const rejectFriend = async (userId) => {
+    try {
+      const { data, error } = await supabase
+      .rpc('reject_friend', { requester_id: userId })
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error rejecting friend");
+    }
+  };
+
+  const blockFriend = async (userId) => {
+    try {
+      const { data, error } = await supabase
+      .rpc('block_friend', { user_to_block: userId })
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error blocking friend");
+    }
+  };
+
+  const getFriendRequests = async () => {
+    try {
+      const { data, error } = await supabase
+      .rpc('get_friend_requests')
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error getting friend requests");
+    }
+  };
+
   return {
     getUser,
     getProfileById,
@@ -403,6 +502,15 @@ export const useSupabaseDatabase = () => {
     getFeedByUserId,
     getFeedByWallNameAndUserId,
     getFollowsOfUserId,
+    getMyFriends,
+    getAllMyFriends,
+    addFriend,
+    removeFriend,
+    acceptFriend,
+    rejectFriend,
+    blockFriend,
+    getFriendRequests,
+    searchUsers,
     createPost,
     createTags,
     createWall,

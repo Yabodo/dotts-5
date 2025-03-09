@@ -1,6 +1,10 @@
 <script setup>
 import { ref, onMounted } from "vue";
 
+definePageMeta({
+  middleware: ['auth']
+})
+
 const { getGlobalFeed, deletePostById, deletePostTagsByPostId, createFollow, deleteFollow } =
   useSupabaseDatabase();
 const localPost = inject("localPost");
