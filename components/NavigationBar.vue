@@ -16,9 +16,11 @@
         <div class="md:flex md:items-center md:gap-12">
           <nav aria-label="Global">
             <ul class="flex items-center text-sm m-0 p-0 md:pt-0">
-              <ButtonText to="/f" label="My feed" icon="i-tabler-star" />
+              <ButtonText v-if="useRoute().path !== '/f'" to="/f" label="Friends" icon="i-tabler-heart" />
 
-              <ButtonText to="/" label="Global feed" icon="i-tabler-world" />
+              <ButtonText v-if="useRoute().path !== '/'" to="/" label="My feed" icon="i-tabler-star" />
+
+              <ButtonText v-if="useRoute().path !== '/g'" to="/g" label="Global feed" icon="i-tabler-world" />
 
               <ButtonText @click="signOut" v-if="localUser?.me.value" label="Log out" icon="i-tabler-user-minus" />
             </ul>
@@ -30,6 +32,8 @@
 </template>
 
 <script setup>
+import { useRoute } from 'vue-router'
+
 const {
   signOut
 } = useSupabaseDatabase();

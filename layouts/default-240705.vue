@@ -246,6 +246,6 @@ watch(
         </form>
       </template>
     </template>
-    <slot />
+    <NuxtPage />
   </div>
 </template>

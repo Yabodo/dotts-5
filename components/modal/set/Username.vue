@@ -36,7 +36,7 @@
                     <input v-model="username" id="username" name="username" type="text" autocomplete="nickname" class="block w-full rounded-md border-0 py-1.5 ps-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" />
                   </div>
                 </div>
-                <ButtonPrimary @click="onSubmit" label="Save" icon="i-tabler-save" class="mb-4 flex w-full justify-center px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" />
+                <ButtonPrimary @click="onSubmit" label="Save" icon="i-tabler-device-floppy" class="mb-4 flex w-full justify-center px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" />
                 <div class="pb-5" />
               </form>
             </div>

@@ -130,8 +130,8 @@ onMounted(() => {
 
 <style scoped>
 .editorWrapper {
-  border: 1px #e4e4e4 solid;
-  border-radius: 5px;
+  display: block;
+  flex-grow: 1;
 }
 
 .editor :deep(.ce-toolbar__content .ce-toolbar__actions) {

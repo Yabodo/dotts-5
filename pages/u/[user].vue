@@ -1,7 +1,6 @@
 <template>
   <div>
-    <p v-if="pending">Loading...</p>
-    <template v-else-if="host">
+    <template v-if="host">
       <p>
         Host:
         <NuxtLink
@@ -13,7 +12,7 @@
           {{ host.name }}
         </NuxtLink>
       </p>
-      <MasonryWall :items="posts" :column-width="400" :gap="16" class="my-3">
+      <MasonryWall v-if="posts" :items="posts" :column-width="400" :gap="16" class="my-3">
         <template #default="{ item: post }">
           <Post
             :post="post"
@@ -44,34 +43,32 @@ const {
 
 const localPost = inject("localPost");
 const localFollows = inject("localFollows");
+const host = ref()
+const loading = ref(true)
 
-const paramUser = computed(() => route.params.user);
+const paramUser = computed(() => route.params?.user);
 
-const {
-  data: host,
-  pending: hostPending,
-  refresh: refreshHost,
-} = useAsyncData("host", () => getProfileByName(paramUser.value), {
-  watch: [paramUser],
+onMounted(async () => {
+  loading.value = true
+  if (paramUser.value) {
+    host.value = await getProfileByName(paramUser.value)
+  }
+  loading.value = false
 });
 
 const {
   data: posts,
-  pending: postsPending,
   refresh: refreshPosts,
 } = useAsyncData(
   "posts",
   async () => {
-    const hostData = await getProfileByName(paramUser.value);
-    if (hostData) {
-      return getFeedByUserId(hostData.id);
+    if (host.value) {
+      return getFeedByUserId(host.value.id);
     }
     return [];
   },
-  { watch: [paramUser] }
+  { watch: [host] }
 );
-
-const pending = computed(() => hostPending.value || postsPending.value);
 
 async function onFollow(tag) {
   await createFollow(tag.walls.id);

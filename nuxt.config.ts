@@ -19,18 +19,23 @@ export default defineNuxtConfig({
       ],
     },
   },
+
   build: {
     transpile: ['@yeger/vue-masonry-wall']
   },
+
   css: [
     '@/assets/css/main.css'
   ],
+
   modules: [
     '@unocss/nuxt',
     '@nuxtjs/color-mode',
     '@pinia/nuxt',
   ],
+
   devtools: { enabled: true },
+
   runtimeConfig: {
     public: {
       ANNOUNCEMENT: process.env.ANNOUNCEMENT,
@@ -39,13 +44,16 @@ export default defineNuxtConfig({
     },
     SUPABASE_API_SECRET: process.env.SUPABASE_API_SECRET,
   },
+
   plugins: [
     "~/plugins/multiselect.js",
     "~/plugins/vue-masonry-wall.ts",
   ],
+
   pinia: {
     storesDirs: ['./stores/**'],
   },
+
   unocss: {
     shortcuts: [
       [
@@ -90,4 +98,6 @@ export default defineNuxtConfig({
       },
     },
   },
+
+  compatibilityDate: '2025-03-09',
 });

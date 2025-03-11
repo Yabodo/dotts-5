@@ -216,11 +216,10 @@ export const useSupabaseDatabase = () => {
     }
   };
 
-  const getMyFeed = async (userId) => {
+  const getMyFeed = async (userId, page = 0) => {
     try {
       const { data, error } = await supabase
-      .rpc('get_posts_from_followed_walls', { user_uuid: userId })
-      .limit(20)
+      .rpc('get_posts_from_followed_users_and_me', { user_uuid: userId, page_size: 20, page })
       if (error) throw error;
       return data;
     } catch (error) {
@@ -326,6 +325,20 @@ export const useSupabaseDatabase = () => {
     }
   };
 
+  const updateUserNote = async (id, note) => {
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .update({ note })
+        .eq("id", id)
+        .select();
+
+      if (error) throw error;
+    } catch (error) {
+      handleError(error, "Error updating user note");
+    }
+  };
+
   const insertUsername = async (name) => {
     try {
       const { error } = await supabase
@@ -389,6 +402,28 @@ export const useSupabaseDatabase = () => {
       if (error) throw error;
     } catch (error) {
       handleError(error, "Error deleting post tags by post id");
+    }
+  };
+
+  const followUser = async (userId, followedId) => {
+    try {
+      const { data, error } = await supabase
+      .rpc("follow_user", { fr_id: userId, fd_id: followedId })
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error following user");
+    }
+  };
+
+  const unfollowUser = async (userId, followedId) => {
+    try {
+      const { data, error } = await supabase
+        .rpc('unfollow_user', { fr_id: userId, fd_id: followedId });
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error unfollowing user");
     }
   };
 
@@ -502,6 +537,8 @@ export const useSupabaseDatabase = () => {
     getFeedByUserId,
     getFeedByWallNameAndUserId,
     getFollowsOfUserId,
+    followUser,
+    unfollowUser,
     getMyFriends,
     getAllMyFriends,
     addFriend,
@@ -519,6 +556,7 @@ export const useSupabaseDatabase = () => {
     deletePostTagsByPostId,
     deleteFollow,
     updateUsername,
+    updateUserNote,
     insertUsername,
     upsertUsername,
     supabase,

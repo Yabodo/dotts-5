@@ -60,21 +60,6 @@ async function getMyFollows() {
   }
 }
 
-async function createMyWall(name) {
-  try {
-    const data = await createWall(name);
-    const newTag = { id: data[0].id, name: data[0].name };
-    walls.value.push(newTag);
-    newTags.value.push(newTag);
-  } catch (error) {
-    addNotification('Error creating wall.', 'error');
-  }
-}
-
-function removeTag(tag) {
-  newTags.value = newTags.value.filter((obj) => obj.id !== tag.id);
-}
-
 async function onPost() {
   if (newContent.value === "" && newLink.value === "") {
     addNotification("Please don't make empty posts.", 'warning');
@@ -146,6 +131,15 @@ watch(
 );
 
 watch(
+  () => newLink.value,
+  async (newValue, oldValue) => {
+    if (newValue && oldValue == '') {
+      showNewLink.value = true
+    }
+  }
+);
+
+watch(
   () => notification.value,
   (newValue, _oldValue) => {
     if (newValue) {
@@ -186,24 +180,10 @@ watch(
             style="border: 1px #e4e4e4 solid; border-radius: 5px;"
           />
         </div>
-        <div>
-          <multiselect
-            v-model="newTags"
-            tag-placeholder="Add this as new tag"
-            placeholder="Search or add a tag"
-            label="name"
-            :options="walls"
-            :multiple="true"
-            :taggable="true"
-            @tag="createMyWall"
-            @remove="removeTag"
-            style="margin: 0.5rem 0"
-          ></multiselect>
-        </div>
         <ButtonPrimary @click="onPost" label="Post" icon="i-tabler-message" class="my-2" />
       </form>
     </template>
-    <slot />
+    <NuxtPage v-if="user" />
   </div>
 </template>
 
