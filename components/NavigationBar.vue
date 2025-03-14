@@ -22,7 +22,9 @@
 
               <ButtonText v-if="useRoute().path !== '/g'" to="/g" label="Global feed" icon="i-tabler-world" />
 
-              <ButtonText @click="signOut" v-if="localUser?.me.value" label="Log out" icon="i-tabler-user-minus" />
+              <ButtonText v-if="localUser?.profile.value && useRoute().path !== `/u/${localUser.profile.value.name}`" label="Profile" :to="`/u/${localUser?.profile?.value?.name}`" icon="i-tabler-user" />
+
+              <ButtonText v-else-if="localUser?.me.value" @click="signOut" v-if="localUser?.me.value" label="Log out" icon="i-tabler-user-minus" class="text-red-600" />
             </ul>
           </nav>
         </div>

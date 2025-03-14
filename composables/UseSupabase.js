@@ -31,12 +31,12 @@ export const useSupabaseDatabase = () => {
       return true
     } catch (error) {
       if (error.message === "Invalid login credentials") {
-        handleError(error, "Invalid username or password. Please try again.");
+        handleError(error, "Invalid username or password. Please try again");
       }
       else if (error.message === "Email not confirmed") {
-        handleError(error, "Email not confirmed! Please check your inbox or spam.");
+        handleError(error, "Email not confirmed! Please check your inbox or spam");
       } else {
-        handleError(error, "An error occurred while signing in. Please try again.");
+        handleError(error, "An error occurred while signing in. Please try again");
       }
       return false
     }
@@ -64,7 +64,33 @@ export const useSupabaseDatabase = () => {
       }
       return true
     } catch (error) {
-      handleError(error, "An error occurred while registering. Please try a different combination.");
+      handleError(error, "An error occurred while registering. Please try a different combination");
+      return false
+    }
+  }
+
+  async function resetPasswordForEmail(email) {
+    try {
+      const { _data, error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://dotts.org/update-password',
+      });
+      if (error) throw error;
+      return true
+    } catch (error) {
+      handleError(error, "An error occurred while requiring password reset");
+      return false
+    }
+  }
+
+  async function updatePassword(password) {
+    try {
+      const { _data, error } = await supabase.auth.updateUser({
+        password
+      })
+      if (error) throw error;
+      return true
+    } catch (error) {
+      handleError(error, "An error occurred while updating password");
       return false
     }
   }
@@ -565,6 +591,8 @@ export const useSupabaseDatabase = () => {
     notification,
     signIn,
     signOut,
-    signUp
+    signUp,
+    resetPasswordForEmail,
+    updatePassword,
   };
 };

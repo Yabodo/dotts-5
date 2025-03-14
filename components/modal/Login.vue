@@ -22,7 +22,7 @@
 
             <div class="mt-10 mx-auto w-full max-w-sm">
               <form class="space-y-6" @submit.prevent>
-                <div v-if="isLogin || isRegister">
+                <div v-if="isLogin || isRegister || isForgotPassword">
                   <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address</label>
                   <div class="flex items-stretch relative mt-2">
                     <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
@@ -60,8 +60,10 @@
 
                 <div>
                   <ButtonPrimary v-if="isLogin" @click="onLogin()" label="Login" icon="i-tabler-login" class="mb-4 flex w-full justify-center px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" />
+                  <ButtonPrimary v-if="isForgotPassword" @click="onForgotPassword()" label="Get the link" icon="i-tabler-link" class="mb-4 flex w-full justify-center px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" />
                   <ButtonSecondary v-if="isLogin || isRegister" @click="onRegister()" label="Register" icon="i-tabler-signature" class="mb-4 flex w-full justify-center px-3 py-1.5 text-sm font-semibold leading-6 shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" />
-                  <ButtonText v-if="isRegister" @click="modalState = 'login'" label="Log in instead." icon="i-tabler-login" />
+                  <ButtonText v-if="isRegister || isForgotPassword" @click="modalState = 'login'" label="Log in instead." icon="i-tabler-login" />
+                  <ButtonText v-if="isLogin" @click="modalState = 'forgotPassword'" label="Forgot password" icon="i-tabler-question-mark" />
                   <div class="mb-10" />
                 </div>
               </form>
@@ -81,32 +83,40 @@ import { Dialog, DialogPanel, TransitionChild, TransitionRoot } from '@headlessu
 const {
   signIn,
   signUp,
+  resetPasswordForEmail,
 } = useSupabaseDatabase();
 
 const { addNotification } = useNotifications()
 
 const open = ref(true)
-const modalState = ref("login") // "login, register, terms"
+const modalState = ref("login") // "login, register, terms, forgotPassword"
 const acceptedTerms = ref(true)
 const email = ref("")
 const password = ref("")
 const modalNotification = ref("")
 
-  const isRegister = computed(() => {
-    return ['register'].includes(modalState.value)
-  })
+const isRegister = computed(() => {
+  return ['register'].includes(modalState.value)
+})
 
-  const isLogin = computed(() => {
-    return ['login'].includes(modalState.value)
-  })
+const isLogin = computed(() => {
+  return ['login'].includes(modalState.value)
+})
 
-  const isTerms = computed(() => {
-    return ['terms'].includes(modalState.value)
-  })
+const isTerms = computed(() => {
+  return ['terms'].includes(modalState.value)
+})
+
+const isForgotPassword = computed(() => {
+  return ['forgotPassword'].includes(modalState.value)
+})
 
 const modalTitle = computed(() => {
   if (modalState.value == "login") {
     return "Sign in to your account"
+  }
+  else if (modalState.value == "forgotPassword") {
+    return "Click link in email, then change password"
   } else {
     return "Register for an account"
   }
@@ -136,6 +146,15 @@ async function onLogin() {
     password.value = ""
     open.value = false
   }
+}
+
+async function onForgotPassword() {
+  modalNotification.value = ""
+  if (email.value == "") {
+    return
+  }
+
+  await resetPasswordForEmail(email.value)
 }
 
 </script>
