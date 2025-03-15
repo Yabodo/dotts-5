@@ -6,8 +6,6 @@ const {
   getWallsOfUserId,
   getFollowsOfUserId,
   createPost,
-  createTags,
-  createWall,
   getUser,
   user,
   profile,
@@ -74,16 +72,8 @@ async function onPost() {
 
     const post = await createPost(note);
 
-    await createTags(
-      newTags.value.map((tag) => ({
-        wall_id: tag.id,
-        post_id: post.id,
-      }))
-    );
-
     newContent.value = "";
     newLink.value = "";
-    newTags.value = [];
     refresh.value++;
     notification.value = "Post created successfully!";
   } catch (error) {

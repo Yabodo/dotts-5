@@ -295,34 +295,6 @@ export const useSupabaseDatabase = () => {
     }
   };
 
-  const createTags = async (convertedTags) => {
-    try {
-      const { data, error } = await supabase
-        .from("tags")
-        .insert(convertedTags)
-        .select();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      handleError(error, "Error inserting tags");
-    }
-  };
-
-  const createWall = async (name) => {
-    try {
-      const { data, error } = await supabase
-        .from("walls")
-        .insert([{ name }])
-        .select();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      handleError(error, "Error creating wall");
-    }
-  };
-
   const createFollow = async (wallId) => {
     try {
       const { data, error } = await supabase
