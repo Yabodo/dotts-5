@@ -121,7 +121,7 @@ watch(
               <input v-model="userNote" id="note" name="note" type="text" class="flex-1 rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6" />
               <ButtonPrimaryIcon @click="onSaveNote" icon="i-tabler-device-floppy" class="ms-2" />
             </div>
-            <p v-else-if="!changeNote && profile.note == ''" @click="changeNote = true" class="user-note text-gray-500">
+            <p v-else-if="!changeNote && (!profile.note || !profile.note.trim())" @click="changeNote = true" class="user-note text-gray-500">
               Feel free to add your user description :)
             </p>
             <p v-else @click="changeNote = true" class="user-note">

@@ -116,7 +116,7 @@ const modalTitle = computed(() => {
     return "Sign in to your account"
   }
   else if (modalState.value == "forgotPassword") {
-    return "Click link in email, then change password"
+    return "Reset password"
   } else {
     return "Register for an account"
   }
@@ -154,7 +154,10 @@ async function onForgotPassword() {
     return
   }
 
-  await resetPasswordForEmail(email.value)
+  const resetSuccess = await resetPasswordForEmail(email.value)
+  if (resetSuccess) {
+    addNotification("Check your email!")
+  }
 }
 
 </script>

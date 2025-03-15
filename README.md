@@ -5,8 +5,7 @@ Dotts is a modern social platform that allows users to create, share, and discov
 ## Features
 
 - **Rich Text Editor**: Create posts with formatted text, lists, quotes, and more
-- **Wall System**: Organize and discover content through customizable tags/walls
-- **Follow System**: Follow specific walls to curate your personal feed
+- **Follow System**: Add or follow users to curate your personal feed
 - **Link Sharing**: Share and preview links within posts
 - **Responsive Design**: Works seamlessly across desktop and mobile devices
 - **Real-time Updates**: Instant feed updates when new content is posted
@@ -24,7 +23,7 @@ Dotts is a modern social platform that allows users to create, share, and discov
 
 ## Prerequisites
 
-- Node.js 16.x or higher
+- Node.js 18.x or higher
 - NPM or other package manager (Yarn, PNPM, Bun)
 - Supabase account and project
 

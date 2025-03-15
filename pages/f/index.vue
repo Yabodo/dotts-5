@@ -132,7 +132,11 @@ const otherFriends = computed(() => {
              class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
           <div class="flex items-center">
             <div class="i-tabler-user text-2xl text-gray-600 mr-3" />
-            <span class="font-medium">{{ user.name }}</span>
+            <NuxtLink 
+              :to="{ name: 'u-user', params: { user: user.name }}"
+            >
+            <ButtonUsername :label="user.name" />
+            </NuxtLink>
           </div>
           <div class="flex">
             <ButtonTransparentIcon
@@ -165,7 +169,11 @@ const otherFriends = computed(() => {
              class="flex items-center justify-between p-4 bg-white rounded-lg shadow">
           <div class="flex items-center">
             <div class="i-tabler-user-circle text-2xl text-gray-600 mr-3" />
-            <span class="font-medium">{{ request.name || 'Unknown User' }}</span>
+            <NuxtLink 
+              :to="{ name: 'u-user', params: { user: request.name }}"
+            >
+            <ButtonUsername :label="request.name" />
+            </NuxtLink>
           </div>
           <div class="flex gap-2">
             <ButtonPrimary 
