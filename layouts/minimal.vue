@@ -2,6 +2,7 @@
 import { ref, onMounted, watch } from "vue";
 
 const {
+  getProfileById,
   getUser,
   user,
   profile,

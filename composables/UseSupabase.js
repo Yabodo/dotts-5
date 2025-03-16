@@ -42,6 +42,50 @@ export const useSupabaseDatabase = () => {
     }
   }
 
+  const generateApiKey = async (keyName) => {
+    try {
+      const { data, error } = await supabase
+        .rpc('generate_api_key', { key_name: keyName })
+        .single();
+  
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error generating API key");
+      return null;
+    }
+  };
+  
+  const listApiKeys = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('api_keys')
+        .select('id, name, created_at, last_used_at, is_active')
+        .order('created_at', { ascending: false });
+  
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      handleError(error, "Error fetching API keys");
+      return [];
+    }
+  };
+  
+  const revokeApiKey = async (keyId) => {
+    try {
+      const { error } = await supabase
+        .from('api_keys')
+        .update({ is_active: false })
+        .eq('id', keyId);
+  
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      handleError(error, "Error revoking API key");
+      return false;
+    }
+  };
+
   const signOut = async () => {
     try {
       const { error } = await supabase.auth.signOut()
@@ -525,6 +569,9 @@ export const useSupabaseDatabase = () => {
   };
 
   return {
+    generateApiKey,
+    listApiKeys,
+    revokeApiKey,
     getUser,
     getProfileById,
     getProfileByName,
@@ -547,8 +594,6 @@ export const useSupabaseDatabase = () => {
     getFriendRequests,
     searchUsers,
     createPost,
-    createTags,
-    createWall,
     createFollow,
     deletePostById,
     deletePostTagsByPostId,
