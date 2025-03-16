@@ -43,6 +43,40 @@ function focusOnEditor() {
 }
 
 const emit = defineEmits(["update:modelValue"]);
+
+const editorContent = computed(() => {
+  if (!props.modelValue) return null;
+  
+  // If it's already in the correct format, use it as is
+  if (typeof props.modelValue === 'object' && props.modelValue.blocks) {
+    return props.modelValue;
+  }
+  
+  // If it's a string, convert it to the expected format
+  if (typeof props.modelValue === 'string') {
+    return {
+      time: Date.now(),
+      blocks: [
+        {
+          id: generateId(), // You'll need a function to generate a random ID
+          type: "paragraph",
+          data: {
+            text: props.modelValue
+          }
+        }
+      ],
+      version: "2.29.1" // Use your editor's version
+    };
+  }
+  
+  return null;
+});
+
+// Simple function to generate a random ID (similar to what your editor might use)
+function generateId() {
+  return Math.random().toString(36).substring(2, 12);
+}
+
 onMounted(() => {
   editor.value = new EditorJS({
     holder: "editor",
@@ -122,7 +156,7 @@ onMounted(() => {
         emit("update:modelValue", data);
       });
     },
-    data: props.modelValue,
+    data: editorContent.value,
     logLevel: "ERROR",
   });
 });

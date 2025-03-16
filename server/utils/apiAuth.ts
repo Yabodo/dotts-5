@@ -22,16 +22,14 @@ export async function validateApiKey(event: H3Event) {
     })
   }
   
-  // Validate the API key against the database
+  // Validate the API key using the new RPC function
   const client = await supabaseServer(event)
   
   try {
-    // Check if the key exists and is valid
+    console.log(apiKey)
+    // Call the validate_api_key RPC function
     const { data, error } = await client
-      .from('api_keys')
-      .select('id, user_id, is_active')
-      .eq('key_hash', await client.rpc('crypt', { data: apiKey, key: 'bf' }).single())
-      .eq('is_active', true)
+      .rpc('validate_api_key', { provided_key: apiKey })
       .single()
     
     if (error || !data) {
@@ -41,18 +39,12 @@ export async function validateApiKey(event: H3Event) {
       })
     }
     
-    // Update last_used_at timestamp
-    await client
-      .from('api_keys')
-      .update({ last_used_at: new Date().toISOString() })
-      .eq('id', data.id)
-    
     // Set the user ID in the event context for later use
     event.context.auth = {
-      userId: data.user_id
+      userId: data
     }
     
-    return data.user_id
+    return data // This is the user_id
   } catch (error) {
     console.error('Error validating API key:', error)
     throw createError({

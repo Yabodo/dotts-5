@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   
   // Get request body
   const body = await readBody(event)
-  const { content, link } = body
+  const { content } = body
   
   if (!content || typeof content !== 'string') {
     throw createError({
@@ -25,8 +25,7 @@ export default defineEventHandler(async (event) => {
     const { data, error } = await client
       .from('posts')
       .insert([{ 
-        note: content,
-        link: link || null,
+        note: JSON.stringify(body),
         user_id: userId
       }])
       .select()

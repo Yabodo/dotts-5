@@ -16,7 +16,8 @@ export const supabaseServer = async (event?: H3Event): Promise<SupabaseClient> =
   // Create the base client
   const client = createClient(supabaseUrl, supabaseServiceKey, {
     auth: {
-      persistSession: false // Disable session persistence for server-side usage
+      autoRefreshToken: false,
+      persistSession: false
     }
   })
 

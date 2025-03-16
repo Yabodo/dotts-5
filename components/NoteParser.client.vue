@@ -7,7 +7,7 @@ import { ref, computed } from "vue";
 import EditorJSParser from "editorjs-html";
 
 const props = defineProps({
-  note: Object, // Editor.js saved data
+  note: Object | String, // Editor.js saved data
 });
 
 function renderTable(blockData) {
@@ -277,6 +277,9 @@ const html = computed(() => {
           console.warn(`Unhandled block type: ${block.type}`);
       }
     });
+  }
+  else if (typeof props.note === "string") {
+    output += `<p>${props.note}</p>`;
   }
   return output;
 });

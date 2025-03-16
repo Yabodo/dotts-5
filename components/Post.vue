@@ -8,28 +8,36 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["follow", "unFollow", "share", "edit", "delete"]);
+const emit = defineEmits(["share", "edit", "delete"]);
 
 const localUser = inject("localUser");
 const localPost = inject("localPost");
-const localFollows = inject("localFollows");
+
+function parseContent(content) {
+  if (!content) return '';
+  
+  try {
+    // Try to parse as JSON
+    return JSON.parse(content);
+  } catch (e) {
+    // If parsing fails, return the original string
+    if (typeof content === "string") {
+      return content;
+    }
+    else {
+      return { content: {}, link: "" };
+    }
+  }
+}
 
 const parsedNote = computed(() => {
-  try {
-    return JSON.parse(props.post.note);
-  } catch (error) {
-    console.error("Error parsing note:", error);
-    return { content: {}, link: "" };
-  }
-});
-
-const validTags = computed(() => {
-  return props.post.tags?.filter((tag) => tag.walls?.name) || [];
+  return parseContent(props.post.note);
 });
 
 const onShare = () => {
   emit("share");
   localPost.newContent.value = parsedNote.value.content;
+  console.log(localPost.newContent.value)
   localPost.newLink.value = parsedNote.value.link;
   localPost.refresh.value++;
 };
@@ -37,21 +45,6 @@ const onShare = () => {
 const onDelete = () => {
   emit("delete");
 };
-
-const onFollow = (tag) => {
-  if (localUser.me.value) {
-    if (isWallFollowed(tag)) {
-      emit("unFollow", tag);
-    }
-    else if (!isWallFollowed(tag)) {
-      emit("follow", tag);
-    }
-  }
-};
-
-function isWallFollowed(tag) {
-  return localFollows.follows.value.includes(tag.walls.id);
-}
 </script>
 
 <template>
